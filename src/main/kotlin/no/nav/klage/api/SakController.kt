@@ -88,7 +88,7 @@ class SakController(
 
     }
 
-    @PostMapping("/access.rest")
+    @GetMapping("/access.rest")
     fun setAccess(): Access {
         logger.debug("setAccess")
 
