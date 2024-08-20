@@ -1,0 +1,5 @@
+insert into klage.sak (id, fagsak_id, tema, utfall, enhetsnummer, vedtaksdato_as_string, fnr, sakstype, status, saksbehandler_ident) values ('abc2', 'cde2', 'SYK', 'AVSLAG', '4295', '20240101', '29461964263', 'ANKE', 'ST', null);
+insert into klage.sak (id, fagsak_id, tema, utfall, enhetsnummer, vedtaksdato_as_string, fnr, sakstype, status, saksbehandler_ident) values ('abc3', 'cde3', 'SYK', 'AVSLAG', '4416', '20240103', '14828897927', 'KLAGE', 'ST', null);
+insert into klage.sak (id, fagsak_id, tema, utfall, enhetsnummer, vedtaksdato_as_string, fnr, sakstype, status, saksbehandler_ident) values ('abc4', 'cde4', 'SYK', 'AVSLAG', '4416', '20240104', '14828897927', 'ANKE', 'ST', null);
+insert into klage.sak (id, fagsak_id, tema, utfall, enhetsnummer, vedtaksdato_as_string, fnr, sakstype, status, saksbehandler_ident) values ('abc5', 'cde5', 'SYK', 'AVSLAG', '4416', '20240105', '14828897927', 'KLAGE', 'ST', null);
+insert into klage.sak (id, fagsak_id, tema, utfall, enhetsnummer, vedtaksdato_as_string, fnr, sakstype, status, saksbehandler_ident) values ('abc1', 'cde1', 'SYK', 'AVSLAG', '4416', '20240101', '16036832758', 'KLAGE', 'ST', null);
