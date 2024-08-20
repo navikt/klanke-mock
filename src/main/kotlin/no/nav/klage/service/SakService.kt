@@ -12,7 +12,8 @@ class SakService(
 ) {
     fun searchSaker(klankeSearchInput: KlankeSearchInput): List<KlankeSearchHit> {
         return sakRepository.findAll().filter {
-            it.status in listOf(SakStatus.ST, SakStatus.IP)
+            it.status in listOf(SakStatus.ST, SakStatus.IP) &&
+                    it.sakstype == klankeSearchInput.sakstype
         }.sortedByDescending { it.vedtaksdatoAsString }
             .map {
                 KlankeSearchHit(

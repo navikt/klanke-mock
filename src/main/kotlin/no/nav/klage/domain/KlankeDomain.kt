@@ -6,7 +6,7 @@ import java.time.LocalDate
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class KlankeSearchInput(
     val fnr: String,
-    val sakstype: String,
+    val sakstype: Sakstype,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
