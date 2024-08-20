@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api")
 class SakController(
     private val sakService: SakService,
-    service: SakService,
 ) {
 
     companion object {
