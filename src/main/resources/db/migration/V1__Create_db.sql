@@ -16,14 +16,15 @@ $$;
 
 CREATE TABLE klage.sak
 (
-    id TEXT PRIMARY KEY,
-    fagsak_id TEXT,
-    tema TEXT,
-    utfall TEXT,
-    enhetsnummer TEXT,
+    id                    TEXT PRIMARY KEY,
+    fagsak_id             TEXT,
+    tema                  TEXT,
+    utfall                TEXT,
+    enhetsnummer          TEXT,
     vedtaksdato_as_string TEXT,
-    fnr TEXT,
-    sakstype TEXT,
-    status TEXT,
-    saksbehandler_ident TEXT
+    svardato_as_string    TEXT,
+    fnr                   TEXT,
+    sakstype              TEXT,
+    status                TEXT,
+    saksbehandler_ident   TEXT
 );

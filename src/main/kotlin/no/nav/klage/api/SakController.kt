@@ -37,11 +37,11 @@ class SakController(
     @PostMapping("/saker/{sakId}/handledinkabal.rest")
     fun setHandledInKabal(
         @PathVariable("sakId") sakId: String,
-        @RequestBody klankeSearchInput: KlankeSearchInput,
+        @RequestBody handledInKabalInput: HandledInKabalInput,
     ) {
         logger.debug("setHandledInKabal")
 
-        sakService.setHandledInKabal(sakId, klankeSearchInput)
+        sakService.setHandledInKabal(sakId, handledInKabalInput)
     }
 
     @PostMapping("/saker/{sakId}/assignedinkabal.rest")

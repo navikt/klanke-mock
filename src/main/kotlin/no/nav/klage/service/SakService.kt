@@ -30,10 +30,11 @@ class SakService(
             }
     }
 
-    fun setHandledInKabal(sakId: String, klankeSearchInput: KlankeSearchInput) {
+    fun setHandledInKabal(sakId: String, handledInKabalInput: HandledInKabalInput) {
         sakRepository.getReferenceById(sakId).apply {
             status = SakStatus.IP
             saksbehandlerIdent = "KABAL"
+            svardatoAsString = handledInKabalInput.svardatoAsString
         }
     }
 

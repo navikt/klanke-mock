@@ -15,6 +15,7 @@ class Sak(
     var utfall: Utfall,
     var enhetsnummer: String,
     val vedtaksdatoAsString: String,
+    var svardatoAsString: String,
     val fnr: String,
     @Enumerated(EnumType.STRING)
     val sakstype: Sakstype,
@@ -36,7 +37,7 @@ class Sak(
     }
 
     override fun toString(): String {
-        return "Sak(id='$id', fagsakId='$fagsakId', tema='$tema', utfall=$utfall, enhetsnummer='$enhetsnummer', vedtaksdatoAsString='$vedtaksdatoAsString', fnr='$fnr', sakstype=$sakstype, status=$status, saksbehandlerIdent='$saksbehandlerIdent')"
+        return "Sak(id='$id', fagsakId='$fagsakId', tema='$tema', utfall=$utfall, enhetsnummer='$enhetsnummer', vedtaksdatoAsString='$vedtaksdatoAsString', svardatoAsString='$svardatoAsString', fnr='$fnr', sakstype=$sakstype, status=$status, saksbehandlerIdent='$saksbehandlerIdent')"
     }
 
 }
