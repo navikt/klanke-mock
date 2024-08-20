@@ -1,0 +1,22 @@
+ingresses:
+  - https://klanke-mock.intern.dev.nav.no
+
+inboundApplications:
+  - application: klage-fss-proxy
+    namespace: klage
+    cluster: dev-fss
+springProfile: dev-gcp
+tenant: trygdeetaten.no
+db_tier: db-f1-micro
+db_size: 10
+db_ha: false
+db_type: POSTGRES_14
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 5
+
+envs:
+  - name: JAVA_TOOL_OPTIONS
+    value: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005

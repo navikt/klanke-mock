@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: klanke-mock
+  main:
+    banner-mode: OFF
+  web:
+    resources:
+      add-mappings: false
+  mvc:
+    log-request-details: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  codec:
+    max-in-memory-size: 256MB
+  datasource:
+    url: ${NAIS_DATABASE_KLANKE_MOCK_KLANKE_MOCK_JDBC_URL}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    clean-on-validation-error: false
+    schemas: flyway_history_schema,klage
+    connect-retries: 2
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        session:
+          events:
+            log:
+              LOG_QUERIES_SLOWER_THAN_MS: 100
+
+server:
+  port: 7070
+  error:
+    whitelabel:
+      enabled: false
+  shutdown: graceful
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
+  endpoint:
+    health:
+      show-details: always
+  endpoints.web:
+    exposure:
+      include: info, health, metrics, prometheus
+    base-path: "/internal"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    enabled: false
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+no.nav.security.jwt:
+  issuer:
+    aad:
+      discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+      accepted_audience: ${AZURE_APP_CLIENT_ID}
