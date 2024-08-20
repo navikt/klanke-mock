@@ -41,6 +41,7 @@ class SakRepositoryTest {
                 utfall = Utfall.AVSLAG,
                 enhetsnummer = "fusce",
                 vedtaksdatoAsString = "arcu",
+                svardatoAsString = "efficitur",
                 fnr = "efficitur",
                 sakstype = Sakstype.KLAGE,
                 status = SakStatus.FINISHED,
