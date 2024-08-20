@@ -1,17 +1,26 @@
 package no.nav.klage.domain
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.hibernate.annotations.DynamicUpdate
-import java.util.*
 
 @Entity
 @Table(name = "sak", schema = "klage")
 @DynamicUpdate
 class Sak(
     @Id
-    val id: UUID = UUID.randomUUID(),
+    val id: String,
+    val fagsakId: String,
+    val tema: String,
+    @Enumerated(EnumType.STRING)
+    var utfall: Utfall,
+    var enhetsnummer: String,
+    val vedtaksdatoAsString: String,
+    val fnr: String,
+    @Enumerated(EnumType.STRING)
+    val sakstype: Sakstype,
+    @Enumerated(EnumType.STRING)
+    var status: SakStatus,
+    var saksbehandlerIdent: String,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -25,4 +34,16 @@ class Sak(
     override fun hashCode(): Int {
         return id.hashCode()
     }
+
+    override fun toString(): String {
+        return "Sak(id='$id', fagsakId='$fagsakId', tema='$tema', utfall=$utfall, enhetsnummer='$enhetsnummer', vedtaksdatoAsString='$vedtaksdatoAsString', fnr='$fnr', sakstype=$sakstype, status=$status, saksbehandlerIdent='$saksbehandlerIdent')"
+    }
+
+}
+
+enum class SakStatus {
+    FINISHED,
+    ST,
+    IP,
+    UB,
 }

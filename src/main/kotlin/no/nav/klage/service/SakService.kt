@@ -1,6 +1,6 @@
 package no.nav.klage.service
 
-import no.nav.klage.api.*
+import no.nav.klage.domain.*
 import no.nav.klage.repository.SakRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -8,31 +8,75 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class SakService(
-    sakRepository: SakRepository,
+    private val sakRepository: SakRepository,
 ) {
     fun searchSaker(klankeSearchInput: KlankeSearchInput): List<KlankeSearchHit> {
-        TODO("Not yet implemented")
+        return sakRepository.findAll().filter {
+            it.status in listOf(SakStatus.ST, SakStatus.IP)
+        }.sortedByDescending { it.vedtaksdatoAsString }
+            .map {
+                KlankeSearchHit(
+                    sakId = it.id,
+                    fagsakId = it.fagsakId,
+                    tema = it.tema,
+                    utfall = it.utfall,
+                    enhetsnummer = it.enhetsnummer,
+                    vedtaksdatoAsString = it.vedtaksdatoAsString,
+                    fnr = it.fnr,
+                    sakstype = it.sakstype,
+                )
+            }
     }
 
     fun setHandledInKabal(sakId: String, klankeSearchInput: KlankeSearchInput) {
-        TODO("Not yet implemented")
+        sakRepository.getReferenceById(sakId).apply {
+            status = SakStatus.IP
+            saksbehandlerIdent = "KABAL"
+        }
     }
 
     fun setAssignedInKabal(sakId: String, assignedInKabalInput: AssignedInKabalInput) {
-        TODO("Not yet implemented")
+        sakRepository.getReferenceById(sakId).apply {
+            status = SakStatus.UB
+            saksbehandlerIdent = assignedInKabalInput.saksbehandlerIdent
+            if (assignedInKabalInput.enhetsnummer != null) {
+                enhetsnummer = assignedInKabalInput.enhetsnummer
+            }
+        }
     }
 
     fun setSakFinished(sakId: String, sakFinishedInput: SakFinishedInput) {
-        TODO("Not yet implemented")
+        sakRepository.getReferenceById(sakId).apply {
+            status = SakStatus.FINISHED
+            utfall = sakFinishedInput.utfall
+            saksbehandlerIdent = sakFinishedInput.saksbehandlerIdent
+        }
     }
 
     fun setSakFeilregistrert(sakId: String, feilregistrertInKabalInput: FeilregistrertInKabalInput) {
-        TODO("Not yet implemented")
+        sakRepository.getReferenceById(sakId).apply {
+            status = SakStatus.ST
+            saksbehandlerIdent = feilregistrertInKabalInput.saksbehandlerIdent
+        }
     }
 
     fun getSakAppAccess(sakId: String, input: GetSakWithSaksbehandlerIdent): KlankeSearchHit {
-        TODO("Not yet implemented")
+        return sakRepository.findById(sakId).get().let {
+            KlankeSearchHit(
+                sakId = it.id,
+                fagsakId = it.fagsakId,
+                tema = it.tema,
+                utfall = it.utfall,
+                enhetsnummer = it.enhetsnummer,
+                vedtaksdatoAsString = it.vedtaksdatoAsString,
+                fnr = it.fnr,
+                sakstype = it.sakstype,
+            )
+        }
     }
 
+    fun createSak(sak: Sak): Sak {
+        return sakRepository.save(sak)
+    }
 
 }

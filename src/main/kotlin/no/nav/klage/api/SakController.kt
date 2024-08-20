@@ -1,5 +1,6 @@
 package no.nav.klage.api
 
+import no.nav.klage.domain.*
 import no.nav.klage.getLogger
 import no.nav.klage.service.SakService
 import org.springframework.web.bind.annotation.*
@@ -14,6 +15,15 @@ class SakController(
     companion object {
         @Suppress("JAVA_CLASS_ON_COMPANION")
         private val logger = getLogger(javaClass.enclosingClass)
+    }
+    //Utility. Not in the original api we are mocking. Could be useful in tests.
+    @PostMapping("/saker")
+    fun createSak(
+        @RequestBody sak: Sak,
+    ): Sak {
+        logger.debug("createSak")
+
+        return sakService.createSak(sak)
     }
 
     @PostMapping("/saker.rest")

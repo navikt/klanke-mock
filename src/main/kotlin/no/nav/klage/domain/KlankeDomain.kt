@@ -1,4 +1,4 @@
-package no.nav.klage.api
+package no.nav.klage.domain
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
@@ -14,12 +14,26 @@ data class KlankeSearchHit(
     val sakId: String,
     val fagsakId: String,
     val tema: String,
-    val utfall: String,
+    val utfall: Utfall,
     val enhetsnummer: String,
     val vedtaksdatoAsString: String,
     val fnr: String,
-    val sakstype: String,
+    val sakstype: Sakstype,
 )
+
+enum class Sakstype {
+    ANKE,
+    KLAGE,
+    KLAGE_AVREGNING,
+    KLAGE_CONDICTIO_INDEBITI,
+    KLAGE_ETTERGIVELSE,
+    KLAGE_TILBAKEBETALING,
+    KLAGE_TILBAKEBETALING_SU,
+    SOEKNAD,
+    SOEKNAD_ETTERGIVELSE,
+    STRAFFERETTSLIG_VURDERING,
+    SOEKNAD_GODKJENNING_Y_SKADE_SYKDOM;
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SakFromKlanke(
