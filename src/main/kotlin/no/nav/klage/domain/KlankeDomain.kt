@@ -36,18 +36,6 @@ enum class Sakstype {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class SakFromKlanke(
-    val sakId: String,
-    val fagsakId: String,
-    val tema: String,
-    val utfall: String,
-    val enhetsnummer: String,
-    val vedtaksdato: LocalDate,
-    val fnr: String,
-    val sakstype: String,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class HandledInKabalInput(
     //aka frist
     val svardatoAsString: String
@@ -57,11 +45,6 @@ data class HandledInKabalInput(
 data class AssignedInKabalInput(
     val saksbehandlerIdent: String,
     val enhetsnummer: String?
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class GetSakAppAccessInput(
-    val saksbehandlerIdent: String
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
