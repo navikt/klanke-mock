@@ -32,7 +32,7 @@ class SakController(
         logger.debug("searchSaker")
 
         //sleep to simulate slow Infotrygd
-        Thread.sleep(3000)
+        Thread.sleep(1000)
 
         return sakService.searchSaker(klankeSearchInput)
     }
