@@ -26,6 +26,8 @@ class SakService(
                     vedtaksdatoAsString = it.vedtaksdatoAsString,
                     fnr = it.fnr,
                     sakstype = it.sakstype,
+                    typeResultat = it.typeResultat,
+                    nivaa = it.nivaa,
                 )
             }
     }
@@ -74,6 +76,8 @@ class SakService(
                 vedtaksdatoAsString = it.vedtaksdatoAsString,
                 fnr = it.fnr,
                 sakstype = it.sakstype,
+                typeResultat = it.typeResultat,
+                nivaa = it.nivaa,
             )
         }
     }

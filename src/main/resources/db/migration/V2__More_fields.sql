@@ -1,0 +1,3 @@
+ALTER TABLE klage.sak
+    ADD COLUMN type_resultat TEXT DEFAULT 'INNSTILLING_1',
+    ADD COLUMN nivaa TEXT DEFAULT 'TK';

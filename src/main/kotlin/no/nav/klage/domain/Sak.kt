@@ -22,6 +22,10 @@ class Sak(
     @Enumerated(EnumType.STRING)
     var status: SakStatus,
     var saksbehandlerIdent: String,
+    @Enumerated(EnumType.STRING)
+    var typeResultat: TypeResultat,
+    @Enumerated(EnumType.STRING)
+    var nivaa: Nivaa,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -37,7 +41,7 @@ class Sak(
     }
 
     override fun toString(): String {
-        return "Sak(id='$id', fagsakId='$fagsakId', tema='$tema', utfall=$utfall, enhetsnummer='$enhetsnummer', vedtaksdatoAsString='$vedtaksdatoAsString', svardatoAsString='$svardatoAsString', fnr='$fnr', sakstype=$sakstype, status=$status, saksbehandlerIdent='$saksbehandlerIdent')"
+        return "Sak(id='$id', fagsakId='$fagsakId', tema='$tema', utfall=$utfall, enhetsnummer='$enhetsnummer', vedtaksdatoAsString='$vedtaksdatoAsString', svardatoAsString='$svardatoAsString', fnr='$fnr', sakstype=$sakstype, status=$status, saksbehandlerIdent='$saksbehandlerIdent', typeResultat=$typeResultat, nivaa=$nivaa)"
     }
 
 }
