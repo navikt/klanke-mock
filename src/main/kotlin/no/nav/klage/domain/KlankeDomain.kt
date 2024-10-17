@@ -19,6 +19,8 @@ data class KlankeSearchHit(
     val vedtaksdatoAsString: String,
     val fnr: String,
     val sakstype: Sakstype,
+    val typeResultat: TypeResultat,
+    val nivaa: Nivaa,
 )
 
 enum class Sakstype {
@@ -68,11 +70,13 @@ enum class Status {
 }
 
 enum class Nivaa {
-    KA, TR
+    TK, KA, TR
 }
 
 enum class TypeResultat {
-    RESULTAT, INNSTILLING_2
+    RESULTAT,
+    INNSTILLING_1,
+    INNSTILLING_2,
 }
 
 enum class Utfall {
