@@ -45,7 +45,9 @@ class SakRepositoryTest {
                 fnr = "efficitur",
                 sakstype = Sakstype.KLAGE,
                 status = SakStatus.FINISHED,
-                saksbehandlerIdent = "falli"
+                saksbehandlerIdent = "falli",
+                typeResultat = TypeResultat.INNSTILLING_1,
+                nivaa = Nivaa.TK,
             )
         )
 
