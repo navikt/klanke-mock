@@ -17,7 +17,6 @@ spring:
     driver-class-name: org.postgresql.Driver
   flyway:
     enabled: true
-    clean-on-validation-error: false
     schemas: flyway_history_schema,klage
     connect-retries: 2
   jpa:
