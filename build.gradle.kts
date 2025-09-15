@@ -7,7 +7,7 @@ val logstashVersion = "8.1"
 val logbackSyslog4jVersion = "1.0.0"
 
 plugins {
-    val kotlinVersion = "2.2.10"
+    val kotlinVersion = "2.2.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
