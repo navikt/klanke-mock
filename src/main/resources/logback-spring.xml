@@ -53,5 +53,6 @@
     <logger name="org.hibernate.SQL" level="debug"/>
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="debug"/>
     <logger name="org.hibernate.SQL_SLOW" level="debug"/>
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
 
 </configuration>
