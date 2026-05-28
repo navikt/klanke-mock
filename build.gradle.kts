@@ -45,6 +45,16 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
 
+    //Fix vulnerabilities, while waiting for fix in Spring Boot.
+    implementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.22")
+    implementation("io.netty:netty-codec-http:4.2.14.Final")
+    implementation("io.netty:netty-codec-http2:4.2.14.Final")
+    implementation("io.netty:netty-codec-http3:4.2.14.Final")
+    implementation("io.netty:netty-codec-dns:4.2.14.Final")
+    implementation("io.netty:netty-codec-compression:4.2.14.Final")
+    implementation("io.netty:netty-transport-native-epoll:4.2.14.Final")
+    implementation("io.netty:netty-resolver-dns:4.2.14.Final")
+
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
     implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion")
 
