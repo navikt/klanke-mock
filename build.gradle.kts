@@ -1,13 +1,13 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val mockkVersion = "1.14.9"
+val mockkVersion = "1.14.11"
 val testContainersVersion = "2.0.5"
 val logstashVersion = "9.0"
 val logbackSyslog4jVersion = "1.0.0"
 
 plugins {
-    val kotlinVersion = "2.3.21"
+    val kotlinVersion = "2.4.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
@@ -47,13 +47,13 @@ dependencies {
 
     //Fix vulnerabilities, while waiting for fix in Spring Boot.
     implementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.22")
-    implementation("io.netty:netty-codec-http:4.2.14.Final")
-    implementation("io.netty:netty-codec-http2:4.2.14.Final")
-    implementation("io.netty:netty-codec-http3:4.2.14.Final")
-    implementation("io.netty:netty-codec-dns:4.2.14.Final")
-    implementation("io.netty:netty-codec-compression:4.2.14.Final")
-    implementation("io.netty:netty-transport-native-epoll:4.2.14.Final")
-    implementation("io.netty:netty-resolver-dns:4.2.14.Final")
+    implementation("io.netty:netty-codec-http:4.2.15.Final")
+    implementation("io.netty:netty-codec-http2:4.2.15.Final")
+    implementation("io.netty:netty-codec-http3:4.2.15.Final")
+    implementation("io.netty:netty-codec-dns:4.2.15.Final")
+    implementation("io.netty:netty-codec-compression:4.2.15.Final")
+    implementation("io.netty:netty-transport-native-epoll:4.2.15.Final")
+    implementation("io.netty:netty-resolver-dns:4.2.15.Final")
 
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
     implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion")
