@@ -11,6 +11,11 @@ import org.springframework.transaction.annotation.Transactional
 class SakService(
     private val sakRepository: SakRepository,
 ) {
+    companion object {
+        @Suppress("JAVA_CLASS_ON_COMPANION")
+        private val logger = getLogger(javaClass.enclosingClass)
+    }
+
     fun searchSaker(klankeSearchInput: KlankeSearchInput): List<KlankeSearchHit> {
         return sakRepository.findAll().filter {
             it.fnr == klankeSearchInput.fnr &&
@@ -31,7 +36,7 @@ class SakService(
                     nivaa = it.nivaa,
                 )
             }.also {
-                getLogger(javaClass.enclosingClass).debug("searchSaker: {}", it)
+                logger.debug("searchSaker: {}", it)
             }
     }
 
