@@ -1,6 +1,7 @@
 package no.nav.klage.service
 
 import no.nav.klage.domain.*
+import no.nav.klage.getLogger
 import no.nav.klage.repository.SakRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,6 +30,8 @@ class SakService(
                     typeResultat = it.typeResultat,
                     nivaa = it.nivaa,
                 )
+            }.also {
+                getLogger(javaClass.enclosingClass).debug("searchSaker: {}", it)
             }
     }
 
