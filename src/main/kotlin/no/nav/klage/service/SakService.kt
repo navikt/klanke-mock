@@ -17,7 +17,10 @@ class SakService(
     }
 
     fun searchSaker(klankeSearchInput: KlankeSearchInput): List<KlankeSearchHit> {
-        return sakRepository.findAll().filter {
+        val findAll = sakRepository.findAll()
+        logger.debug("searchSaker.input: {}", klankeSearchInput)
+        logger.debug("searchSaker: findAll: {}", findAll)
+        return findAll.filter {
             it.fnr == klankeSearchInput.fnr &&
                     it.status in listOf(SakStatus.ST, SakStatus.IP) &&
                     it.sakstype == klankeSearchInput.sakstype
