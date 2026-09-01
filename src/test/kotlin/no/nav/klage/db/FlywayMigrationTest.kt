@@ -11,13 +11,11 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.sql.ResultSet
 
-
 @ActiveProfiles("local")
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class FlywayMigrationTest {
-
     companion object {
         @Container
         @JvmField
@@ -29,13 +27,13 @@ class FlywayMigrationTest {
 
     @Test
     fun flyway_should_run() {
-        val saker = jdbcTemplate.query(
-            "SELECT * FROM klage.sak"
-        ) { rs: ResultSet, _: Int ->
-            null
-        }
+        val saker =
+            jdbcTemplate.query(
+                "SELECT * FROM klage.sak",
+            ) { rs: ResultSet, _: Int ->
+                null
+            }
 
         assertThat(saker).hasSize(0)
     }
-
 }

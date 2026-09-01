@@ -3,9 +3,7 @@ package no.nav.klage.db
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 
-class TestPostgresqlContainer private constructor() :
-    PostgreSQLContainer<TestPostgresqlContainer?>(IMAGE_VERSION) {
-
+class TestPostgresqlContainer private constructor() : PostgreSQLContainer<TestPostgresqlContainer?>(IMAGE_VERSION) {
     companion object {
         private const val IMAGE_VERSION = "postgres:18.0"
 
@@ -25,7 +23,6 @@ class TestPostgresqlContainer private constructor() :
     }
 
     override fun stop() {
-        //do nothing, JVM handles shut down
+        // do nothing, JVM handles shut down
     }
-
 }

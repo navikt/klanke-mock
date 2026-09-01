@@ -1,21 +1,41 @@
 package no.nav.klage.api
 
-import no.nav.klage.domain.*
+import no.nav.klage.domain.Access
+import no.nav.klage.domain.AssignedInKabalInput
+import no.nav.klage.domain.FeilregistrertInKabalInput
+import no.nav.klage.domain.GetSakWithSaksbehandlerIdent
+import no.nav.klage.domain.HandledInKabalInput
+import no.nav.klage.domain.KlankeSearchHit
+import no.nav.klage.domain.KlankeSearchInput
+import no.nav.klage.domain.Mottaker
+import no.nav.klage.domain.Nivaa
+import no.nav.klage.domain.Sak
+import no.nav.klage.domain.SakFinishedInput
+import no.nav.klage.domain.SakStatus
+import no.nav.klage.domain.Sakstype
+import no.nav.klage.domain.Status
+import no.nav.klage.domain.TypeResultat
+import no.nav.klage.domain.Utfall
 import no.nav.klage.getLogger
 import no.nav.klage.service.SakService
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api")
 class SakController(
     private val sakService: SakService,
 ) {
-
     companion object {
         @Suppress("JAVA_CLASS_ON_COMPANION")
         private val logger = getLogger(javaClass.enclosingClass)
     }
-    //Utility. Not in the original api we are mocking. Could be useful in tests.
+
+    // Utility. Not in the original api we are mocking. Could be useful in tests.
     @PostMapping("/saker")
     fun createSak(
         @RequestBody sak: Sak,
@@ -31,7 +51,7 @@ class SakController(
     ): List<KlankeSearchHit> {
         logger.debug("searchSaker")
 
-        //sleep to simulate slow Infotrygd
+        // sleep to simulate slow Infotrygd
         Thread.sleep(1000)
 
         return sakService.searchSaker(klankeSearchInput)
@@ -55,7 +75,6 @@ class SakController(
         logger.debug("setAssignedInKabal")
 
         sakService.setAssignedInKabal(sakId, assignedInKabalInput)
-
     }
 
     @PostMapping("/saker/{sakId}/finished.rest")
@@ -66,7 +85,6 @@ class SakController(
         logger.debug("setSakFinished")
 
         sakService.setSakFinished(sakId, sakFinishedInput)
-
     }
 
     @PostMapping("/saker/{sakId}/feilregistrert.rest")
@@ -77,7 +95,6 @@ class SakController(
         logger.debug("setSakFeilregistrert")
 
         sakService.setSakFeilregistrert(sakId, feilregistrertInKabalInput)
-
     }
 
     @PostMapping("/saker/{sakId}/detailsappaccess.rest")
@@ -88,7 +105,6 @@ class SakController(
         logger.debug("setDetailsAppAccess")
 
         return sakService.getSakAppAccess(sakId, input)
-
     }
 
     @GetMapping("/access.rest")
@@ -97,5 +113,4 @@ class SakController(
 
         return Access(access = true)
     }
-
 }
