@@ -34,24 +34,24 @@ enum class Sakstype {
     SOEKNAD,
     SOEKNAD_ETTERGIVELSE,
     STRAFFERETTSLIG_VURDERING,
-    SOEKNAD_GODKJENNING_Y_SKADE_SYKDOM;
+    SOEKNAD_GODKJENNING_Y_SKADE_SYKDOM,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class HandledInKabalInput(
-    //aka frist
-    val svardatoAsString: String
+    // aka frist
+    val svardatoAsString: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AssignedInKabalInput(
     val saksbehandlerIdent: String,
-    val enhetsnummer: String?
+    val enhetsnummer: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class FeilregistrertInKabalInput(
-    val saksbehandlerIdent: String
+    val saksbehandlerIdent: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -70,7 +70,9 @@ enum class Status {
 }
 
 enum class Nivaa {
-    TK, KA, TR
+    TK,
+    KA,
+    TR,
 }
 
 enum class TypeResultat {
@@ -98,15 +100,16 @@ enum class Utfall {
     POLITIANMELDELSE,
     TILBAKEBETALING,
     TVANGSGEBYR_FASTHOLDES,
-    IKKE_BRUK
+    IKKE_BRUK,
 }
 
 enum class Mottaker {
-    TRYGDEKONTOR, TRYGDERETTEN
+    TRYGDEKONTOR,
+    TRYGDERETTEN,
 }
 
 data class Access(
-    val access: Boolean
+    val access: Boolean,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

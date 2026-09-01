@@ -1,7 +1,22 @@
 package no.nav.klage.repository
 
 import no.nav.klage.db.TestPostgresqlContainer
-import no.nav.klage.domain.*
+import no.nav.klage.domain.Access
+import no.nav.klage.domain.AssignedInKabalInput
+import no.nav.klage.domain.FeilregistrertInKabalInput
+import no.nav.klage.domain.GetSakWithSaksbehandlerIdent
+import no.nav.klage.domain.HandledInKabalInput
+import no.nav.klage.domain.KlankeSearchHit
+import no.nav.klage.domain.KlankeSearchInput
+import no.nav.klage.domain.Mottaker
+import no.nav.klage.domain.Nivaa
+import no.nav.klage.domain.Sak
+import no.nav.klage.domain.SakFinishedInput
+import no.nav.klage.domain.SakStatus
+import no.nav.klage.domain.Sakstype
+import no.nav.klage.domain.Status
+import no.nav.klage.domain.TypeResultat
+import no.nav.klage.domain.Utfall
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +32,6 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class SakRepositoryTest {
-
     companion object {
         @Container
         @JvmField
@@ -32,24 +46,24 @@ class SakRepositoryTest {
 
     @Test
     fun `store all values in sak works`() {
-
-        val sak = testEntityManager.persistAndFlush(
-            Sak(
-                id = "nunc",
-                fagsakId = "aliquip",
-                tema = "regione",
-                utfall = Utfall.AVSLAG,
-                enhetsnummer = "fusce",
-                vedtaksdatoAsString = "arcu",
-                svardatoAsString = "efficitur",
-                fnr = "efficitur",
-                sakstype = Sakstype.KLAGE,
-                status = SakStatus.FINISHED,
-                saksbehandlerIdent = "falli",
-                typeResultat = TypeResultat.INNSTILLING_1,
-                nivaa = Nivaa.TK,
+        val sak =
+            testEntityManager.persistAndFlush(
+                Sak(
+                    id = "nunc",
+                    fagsakId = "aliquip",
+                    tema = "regione",
+                    utfall = Utfall.AVSLAG,
+                    enhetsnummer = "fusce",
+                    vedtaksdatoAsString = "arcu",
+                    svardatoAsString = "efficitur",
+                    fnr = "efficitur",
+                    sakstype = Sakstype.KLAGE,
+                    status = SakStatus.FINISHED,
+                    saksbehandlerIdent = "falli",
+                    typeResultat = TypeResultat.INNSTILLING_1,
+                    nivaa = Nivaa.TK,
+                ),
             )
-        )
 
         testEntityManager.clear()
 
@@ -66,7 +80,5 @@ class SakRepositoryTest {
         assertThat(sakFromDB.sakstype).isEqualTo(sak.sakstype)
         assertThat(sakFromDB.status).isEqualTo(sak.status)
         assertThat(sakFromDB.saksbehandlerIdent).isEqualTo(sak.saksbehandlerIdent)
-
     }
-
 }

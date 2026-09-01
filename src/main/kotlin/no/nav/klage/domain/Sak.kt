@@ -1,6 +1,10 @@
 package no.nav.klage.domain
 
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import org.hibernate.annotations.DynamicUpdate
 
 @Entity
@@ -36,14 +40,10 @@ class Sak(
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id.hashCode()
-    }
+    override fun hashCode(): Int = id.hashCode()
 
-    override fun toString(): String {
-        return "Sak(id='$id', fagsakId='$fagsakId', tema='$tema', utfall=$utfall, enhetsnummer='$enhetsnummer', vedtaksdatoAsString='$vedtaksdatoAsString', svardatoAsString='$svardatoAsString', fnr='$fnr', sakstype=$sakstype, status=$status, saksbehandlerIdent='$saksbehandlerIdent', typeResultat=$typeResultat, nivaa=$nivaa)"
-    }
-
+    override fun toString(): String =
+        "Sak(id='$id', fagsakId='$fagsakId', tema='$tema', utfall=$utfall, enhetsnummer='$enhetsnummer', vedtaksdatoAsString='$vedtaksdatoAsString', svardatoAsString='$svardatoAsString', fnr='$fnr', sakstype=$sakstype, status=$status, saksbehandlerIdent='$saksbehandlerIdent', typeResultat=$typeResultat, nivaa=$nivaa)"
 }
 
 enum class SakStatus {
