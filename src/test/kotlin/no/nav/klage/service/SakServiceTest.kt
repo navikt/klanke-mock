@@ -6,8 +6,10 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.klage.domain.CreateSakInput
 import no.nav.klage.domain.Nivaa
 import no.nav.klage.domain.Sak
+import no.nav.klage.domain.SakDefaults
 import no.nav.klage.domain.SakStatus
 import no.nav.klage.domain.Sakstype
 import no.nav.klage.domain.TypeResultat
@@ -41,6 +43,95 @@ class SakServiceTest {
         every { sakRepository.findAll() } returns emptyList()
 
         assertThat(sakService.getAllSaker()).isEmpty()
+    }
+
+    @Test
+    fun `createSak saves sak with generated id and fields from input`() {
+        val saved = slot<Sak>()
+        every { sakRepository.existsById(any()) } returns false
+        every { sakRepository.save(capture(saved)) } answers { firstArg() }
+
+        val result = sakService.createSak(createSakInput())
+
+        assertThat(result).isSameAs(saved.captured)
+        assertThat(result.id).matches("^[a-z0-9]{10}$")
+        assertThat(result)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(createSak(id = result.id))
+        verify(exactly = 1) { sakRepository.existsById(result.id) }
+    }
+
+    @Test
+    fun `createSak applies defaults for fields not set in input`() {
+        every { sakRepository.existsById(any()) } returns false
+        every { sakRepository.save(any()) } answers { firstArg() }
+
+        val result = sakService.createSak(CreateSakInput(fagsakId = "fagsak1", fnr = "12345678910"))
+
+        assertThat(result)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(
+                Sak(
+                    id = result.id,
+                    fagsakId = "fagsak1",
+                    tema = "SYK",
+                    utfall = Utfall.AVSLAG,
+                    enhetsnummer = "4291",
+                    vedtaksdatoAsString = "",
+                    svardatoAsString = "",
+                    fnr = "12345678910",
+                    sakstype = Sakstype.KLAGE,
+                    status = SakStatus.ST,
+                    saksbehandlerIdent = "SYSTEMBRUKER",
+                    typeResultat = TypeResultat.INNSTILLING_1,
+                    nivaa = Nivaa.TK,
+                ),
+            )
+    }
+
+    @Test
+    fun `getDefaults returns defaults keyed by Sak field name`() {
+        assertThat(sakService.getDefaults()).containsExactlyEntriesOf(SakDefaults.asMap())
+        assertThat(sakService.getDefaults().keys).allSatisfy { field ->
+            assertThat(Sak::class.java.getDeclaredField(field)).isNotNull()
+        }
+    }
+
+    @Test
+    fun `createSak generates different ids`() {
+        every { sakRepository.existsById(any()) } returns false
+        every { sakRepository.save(any()) } answers { firstArg() }
+
+        val ids = (1..20).map { sakService.createSak(createSakInput()).id }
+
+        assertThat(ids).allMatch { it.matches(Regex("^[a-z0-9]{10}$")) }
+        assertThat(ids).doesNotHaveDuplicates()
+    }
+
+    @Test
+    fun `createSak retries when generated id already exists`() {
+        val checkedIds = mutableListOf<String>()
+        every { sakRepository.existsById(capture(checkedIds)) } returnsMany listOf(true, false)
+        every { sakRepository.save(any()) } answers { firstArg() }
+
+        val result = sakService.createSak(createSakInput())
+
+        assertThat(checkedIds).hasSize(2)
+        assertThat(checkedIds[0]).isNotEqualTo(checkedIds[1])
+        assertThat(result.id).isEqualTo(checkedIds[1])
+        verify(exactly = 1) { sakRepository.save(any()) }
+    }
+
+    @Test
+    fun `createSak gives up after max attempts when every generated id exists`() {
+        every { sakRepository.existsById(any()) } returns true
+
+        assertThrows<IllegalStateException> { sakService.createSak(createSakInput()) }
+
+        verify(exactly = SakService.SAK_ID_MAX_ATTEMPTS) { sakRepository.existsById(any()) }
+        verify(exactly = 0) { sakRepository.save(any()) }
     }
 
     @Test
@@ -113,6 +204,22 @@ class SakServiceTest {
     private fun createSak(id: String): Sak =
         Sak(
             id = id,
+            fagsakId = "fagsak1",
+            tema = "AAP",
+            utfall = Utfall.AVSLAG,
+            enhetsnummer = "4219",
+            vedtaksdatoAsString = "2026-01-01",
+            svardatoAsString = "2026-01-15",
+            fnr = "12345678910",
+            sakstype = Sakstype.KLAGE,
+            status = SakStatus.ST,
+            saksbehandlerIdent = "Z123456",
+            typeResultat = TypeResultat.RESULTAT,
+            nivaa = Nivaa.KA,
+        )
+
+    private fun createSakInput(): CreateSakInput =
+        CreateSakInput(
             fagsakId = "fagsak1",
             tema = "AAP",
             utfall = Utfall.AVSLAG,

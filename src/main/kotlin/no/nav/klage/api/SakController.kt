@@ -2,6 +2,7 @@ package no.nav.klage.api
 
 import no.nav.klage.domain.Access
 import no.nav.klage.domain.AssignedInKabalInput
+import no.nav.klage.domain.CreateSakInput
 import no.nav.klage.domain.FeilregistrertInKabalInput
 import no.nav.klage.domain.GetSakWithSaksbehandlerIdent
 import no.nav.klage.domain.HandledInKabalInput
@@ -55,13 +56,21 @@ class SakController(
     }
 
     // Utility. Not in the original api we are mocking. Could be useful in tests.
+    @GetMapping("/defaults")
+    fun getDefaults(): Map<String, String> {
+        logger.debug("getDefaults")
+
+        return sakService.getDefaults()
+    }
+
+    // Utility. Not in the original api we are mocking. Could be useful in tests.
     @PostMapping("/saker")
     fun createSak(
-        @RequestBody sak: Sak,
+        @RequestBody input: CreateSakInput,
     ): Sak {
         logger.debug("createSak")
 
-        return sakService.createSak(sak)
+        return sakService.createSak(input)
     }
 
     // Utility. Not in the original api we are mocking. Could be useful in tests.
@@ -155,7 +164,7 @@ class SakController(
         return Access(access = true)
     }
 
-    // A missing required field (e.g. when updating a sak), an invalid enum value or malformed JSON
+    // A missing required field (e.g. fnr when creating a sak), an invalid enum value or malformed JSON
     // gives 400 with Jackson's description of the problem, instead of a 400 with no explanation.
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleUnreadableBody(e: HttpMessageNotReadableException): ProblemDetail {

@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.klage.domain.Sak
+import no.nav.klage.domain.SakDefaults
 import no.nav.klage.repository.SakRepository
 import no.nav.klage.service.SakService
 import org.assertj.core.api.Assertions.assertThat
@@ -17,10 +18,13 @@ import org.springframework.http.MediaType
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.json.JsonMapper
 
 class SakControllerTest {
@@ -37,6 +41,78 @@ class SakControllerTest {
     init {
         every { sakRepository.existsById(any()) } returns false
         every { sakRepository.save(any()) } answers { firstArg() }
+    }
+
+    @Test
+    fun `POST saker with all fields creates sak with generated id`() {
+        postSak(FULL_BODY)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value(matchesIdPattern()))
+            .andExpect(jsonPath("$.fagsakId").value("fagsak1"))
+            .andExpect(jsonPath("$.fnr").value("12345678910"))
+            .andExpect(jsonPath("$.tema").value("AAP"))
+            .andExpect(jsonPath("$.utfall").value("INNVILGET"))
+            .andExpect(jsonPath("$.enhetsnummer").value("4219"))
+            .andExpect(jsonPath("$.vedtaksdatoAsString").value("20240101"))
+            .andExpect(jsonPath("$.svardatoAsString").value("20240201"))
+            .andExpect(jsonPath("$.sakstype").value("ANKE"))
+            .andExpect(jsonPath("$.status").value("IP"))
+            .andExpect(jsonPath("$.saksbehandlerIdent").value("Z123456"))
+            .andExpect(jsonPath("$.typeResultat").value("RESULTAT"))
+            .andExpect(jsonPath("$.nivaa").value("KA"))
+    }
+
+    @Test
+    fun `POST saker ignores id sent by old clients`() {
+        postSak(FULL_BODY.withId("client-chosen-id"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value(matchesIdPattern()))
+
+        verify(exactly = 0) { sakRepository.existsById("client-chosen-id") }
+    }
+
+    @Test
+    fun `POST saker with only fnr and fagsakId applies all defaults`() {
+        postSak("""{"fnr": "12345678910", "fagsakId": "fagsak1"}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value(matchesIdPattern()))
+            .andExpect(jsonPath("$.fnr").value("12345678910"))
+            .andExpect(jsonPath("$.fagsakId").value("fagsak1"))
+            .andExpectDefaults(SakDefaults.asMap())
+    }
+
+    @Test
+    fun `POST saker uses defaults for fields sent as null`() {
+        postSak("""{"fnr": "12345678910", "fagsakId": "fagsak1", "tema": null, "nivaa": null, "utfall": "INNVILGET"}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.tema").value(SakDefaults.TEMA))
+            .andExpect(jsonPath("$.nivaa").value(SakDefaults.NIVAA.name))
+            .andExpect(jsonPath("$.utfall").value("INNVILGET"))
+    }
+
+    @Test
+    fun `POST saker without fnr returns 400 naming the missing field`() {
+        postSak("""{"fagsakId": "fagsak1"}""")
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.detail").value(containsString("'fnr'")))
+
+        verify(exactly = 0) { sakRepository.save(any()) }
+    }
+
+    @Test
+    fun `POST saker with null fnr returns 400 naming the field`() {
+        postSak("""{"fagsakId": "fagsak1", "fnr": null}""")
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.detail").value(containsString("fnr")))
+
+        verify(exactly = 0) { sakRepository.save(any()) }
+    }
+
+    @Test
+    fun `POST saker without fagsakId returns 400 naming the missing field`() {
+        postSak("""{"fnr": "12345678910"}""")
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.detail").value(containsString("'fagsakId'")))
     }
 
     @Test
@@ -93,12 +169,49 @@ class SakControllerTest {
         verify(exactly = 0) { sakRepository.save(any()) }
     }
 
+    @Test
+    fun `GET defaults returns defaults keyed by field name`() {
+        mockMvc
+            .perform(get("/api/defaults"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(SakDefaults.asMap().size))
+            .andExpectDefaults(
+                mapOf(
+                    "tema" to "SYK",
+                    "utfall" to "AVSLAG",
+                    "enhetsnummer" to "4291",
+                    "vedtaksdatoAsString" to "",
+                    "svardatoAsString" to "",
+                    "sakstype" to "KLAGE",
+                    "status" to "ST",
+                    "saksbehandlerIdent" to "SYSTEMBRUKER",
+                    "typeResultat" to "INNSTILLING_1",
+                    "nivaa" to "TK",
+                ),
+            )
+    }
+
+    @Test
+    fun `spring boot json mapper ignores unknown properties`() {
+        val config = bootJsonMapper().deserializationConfig()
+
+        assertThat(config.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
+    }
+
+    private fun postSak(body: String): ResultActions =
+        mockMvc.perform(post("/api/saker").contentType(MediaType.APPLICATION_JSON).content(body))
+
     private fun putSak(
         sakId: String,
         body: String,
     ): ResultActions = mockMvc.perform(put("/api/saker/$sakId").contentType(MediaType.APPLICATION_JSON).content(body))
 
     private fun String.withId(id: String): String = replaceFirst(oldValue = "{", newValue = """{"id": "$id",""")
+
+    private fun ResultActions.andExpectDefaults(defaults: Map<String, String>): ResultActions =
+        defaults.entries.fold(this) { actions, (field, value) -> actions.andExpect(jsonPath("$.$field").value(value)) }
+
+    private fun matchesIdPattern() = org.hamcrest.Matchers.matchesPattern("^[a-z0-9]{10}$")
 
     private fun bootJsonMapper(): JsonMapper {
         lateinit var jsonMapper: JsonMapper

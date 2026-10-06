@@ -2,6 +2,7 @@ package no.nav.klage.service
 
 import no.nav.klage.domain.Access
 import no.nav.klage.domain.AssignedInKabalInput
+import no.nav.klage.domain.CreateSakInput
 import no.nav.klage.domain.FeilregistrertInKabalInput
 import no.nav.klage.domain.GetSakWithSaksbehandlerIdent
 import no.nav.klage.domain.HandledInKabalInput
@@ -10,6 +11,7 @@ import no.nav.klage.domain.KlankeSearchInput
 import no.nav.klage.domain.Mottaker
 import no.nav.klage.domain.Nivaa
 import no.nav.klage.domain.Sak
+import no.nav.klage.domain.SakDefaults
 import no.nav.klage.domain.SakFinishedInput
 import no.nav.klage.domain.SakStatus
 import no.nav.klage.domain.Sakstype
@@ -23,6 +25,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
+import java.security.SecureRandom
 
 @Service
 @Transactional
@@ -32,6 +35,11 @@ class SakService(
     companion object {
         @Suppress("JAVA_CLASS_ON_COMPANION")
         private val logger = getLogger(javaClass.enclosingClass)
+
+        const val SAK_ID_LENGTH = 10
+        const val SAK_ID_MAX_ATTEMPTS = 5
+        private const val SAK_ID_ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789"
+        private val secureRandom = SecureRandom()
     }
 
     fun searchSaker(klankeSearchInput: KlankeSearchInput): List<KlankeSearchHit> {
@@ -128,7 +136,48 @@ class SakService(
 
     fun getAllSaker(): List<Sak> = sakRepository.findAll().sortedBy { it.id }
 
-    fun createSak(sak: Sak): Sak = sakRepository.save(sak)
+    fun createSak(input: CreateSakInput): Sak =
+        sakRepository.save(
+            Sak(
+                id = generateSakId(),
+                fagsakId = input.fagsakId,
+                tema = input.tema ?: SakDefaults.TEMA,
+                utfall = input.utfall ?: SakDefaults.UTFALL,
+                enhetsnummer = input.enhetsnummer ?: SakDefaults.ENHETSNUMMER,
+                vedtaksdatoAsString = input.vedtaksdatoAsString ?: SakDefaults.VEDTAKSDATO_AS_STRING,
+                svardatoAsString = input.svardatoAsString ?: SakDefaults.SVARDATO_AS_STRING,
+                fnr = input.fnr,
+                sakstype = input.sakstype ?: SakDefaults.SAKSTYPE,
+                status = input.status ?: SakDefaults.STATUS,
+                saksbehandlerIdent = input.saksbehandlerIdent ?: SakDefaults.SAKSBEHANDLER_IDENT,
+                typeResultat = input.typeResultat ?: SakDefaults.TYPE_RESULTAT,
+                nivaa = input.nivaa ?: SakDefaults.NIVAA,
+            ),
+        )
+
+    fun getDefaults(): Map<String, String> = SakDefaults.asMap()
+
+    /**
+     * Generates a new sak id: [SAK_ID_LENGTH] random characters from `[a-z0-9]`.
+     *
+     * Shorter than a UUID so it is easy to read and type in tests and the UI, while 36^10
+     * (about 3.7e15) possible values make collisions very unlikely. Random rather than sequential,
+     * so it does not depend on the format of existing (hand picked) ids. JPA `save` would overwrite
+     * an existing row with the same id, so a taken id is retried, but only a few times.
+     */
+    private fun generateSakId(): String {
+        repeat(SAK_ID_MAX_ATTEMPTS) {
+            val id =
+                (1..SAK_ID_LENGTH)
+                    .map { SAK_ID_ALPHABET[secureRandom.nextInt(SAK_ID_ALPHABET.length)] }
+                    .joinToString("")
+            if (!sakRepository.existsById(id)) {
+                return id
+            }
+            logger.warn("Generated sak id {} already exists, retrying", id)
+        }
+        error("Could not generate a unique sak id after $SAK_ID_MAX_ATTEMPTS attempts")
+    }
 
     fun updateSak(
         sakId: String,

@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * Body for replacing a sak with `PUT /api/saker/{sakId}`. The id is immutable and always taken from the path.
  *
- * Every other field is required, since this is a full replace. [id] may be left out. If it is sent, it must match the
+ * Every other field is required; no create defaults are applied, since a full replace that silently reset
+ * missing fields to defaults would be surprising. [id] may be left out. If it is sent, it must match the
  * path, so a client trying to change the id gets a 400 instead of having it silently ignored.
  */
 data class UpdateSakInput(

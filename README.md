@@ -8,13 +8,41 @@ These endpoints are not part of the original API being mocked, but can be used d
 | Method   | Path                   | Description                                                      |
 |----------|------------------------|------------------------------------------------------------------|
 | `GET`    | `/api/saker`           | List all saker, sorted by id                                     |
-| `POST`   | `/api/saker`           | Create a sak, returns the saved `Sak`                            |
+| `POST`   | `/api/saker`           | Create a sak (see below), returns the new `Sak`                  |
 | `PUT`    | `/api/saker/{sakId}`   | Replace a sak (see below), returns the updated `Sak`             |
 | `DELETE` | `/api/saker/{sakId}`   | Delete a sak (204 No Content, 404 if it does not exist)          |
+| `GET`    | `/api/defaults`        | Default values used on create, keyed by field name               |
+
+## Creating a sak
+
+On create, the server generates the sak id: 10 random characters from `[a-z0-9]`. An `id` sent in the `POST` body is ignored. Existing saker keep their ids.
+
+Only `fnr` and `fagsakId` are required. A minimal body:
+
+```json
+{ "fnr": "12345678910", "fagsakId": "fagsak1" }
+```
+
+Missing fields, and fields sent as `null`, get these defaults (also available from `GET /api/defaults`):
+
+| Field                 | Default         |
+|-----------------------|-----------------|
+| `tema`                | `SYK`           |
+| `utfall`              | `AVSLAG`        |
+| `enhetsnummer`        | `4291`          |
+| `vedtaksdatoAsString` | `""`            |
+| `svardatoAsString`    | `""`            |
+| `sakstype`            | `KLAGE`         |
+| `status`              | `ST`            |
+| `saksbehandlerIdent`  | `SYSTEMBRUKER`  |
+| `typeResultat`        | `INNSTILLING_1` |
+| `nivaa`               | `TK`            |
+
+If `fnr` or `fagsakId` is missing or `null`, or the body can't be read (e.g. an unknown enum value), the response is `400 Bad Request` with a problem detail describing the error.
 
 ## Updating a sak
 
-The id of a sak is immutable. `PUT /api/saker/{sakId}` takes the id from the path only, and the body has every other `Sak` field, all required. A missing or `null` field gives `400 Bad Request`. The body does not need an `id`. If it has one that differs from `sakId`, the response is `400 Bad Request`, so the id can't be changed.
+The id of a sak is immutable. `PUT /api/saker/{sakId}` takes the id from the path only, and the body has every other `Sak` field, all required. Create defaults are not applied on update, so a missing or `null` field gives `400 Bad Request`. The body does not need an `id`. If it has one that differs from `sakId`, the response is `400 Bad Request`, so the id can't be changed.
 
 # Linting and verification
 
