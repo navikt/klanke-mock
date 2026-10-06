@@ -15,11 +15,14 @@ import no.nav.klage.domain.SakStatus
 import no.nav.klage.domain.Sakstype
 import no.nav.klage.domain.Status
 import no.nav.klage.domain.TypeResultat
+import no.nav.klage.domain.UpdateSakInput
 import no.nav.klage.domain.Utfall
 import no.nav.klage.getLogger
 import no.nav.klage.repository.SakRepository
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 @Transactional
@@ -123,5 +126,46 @@ class SakService(
             )
         }
 
+    fun getAllSaker(): List<Sak> = sakRepository.findAll().sortedBy { it.id }
+
     fun createSak(sak: Sak): Sak = sakRepository.save(sak)
+
+    fun updateSak(
+        sakId: String,
+        input: UpdateSakInput,
+    ): Sak {
+        if (input.id != null && input.id != sakId) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Sak id ${input.id} in body does not match sakId $sakId in path. The id of a sak cannot be changed",
+            )
+        }
+        if (!sakRepository.existsById(sakId)) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Sak with id $sakId not found")
+        }
+        return sakRepository.save(
+            Sak(
+                id = sakId,
+                fagsakId = input.fagsakId,
+                tema = input.tema,
+                utfall = input.utfall,
+                enhetsnummer = input.enhetsnummer,
+                vedtaksdatoAsString = input.vedtaksdatoAsString,
+                svardatoAsString = input.svardatoAsString,
+                fnr = input.fnr,
+                sakstype = input.sakstype,
+                status = input.status,
+                saksbehandlerIdent = input.saksbehandlerIdent,
+                typeResultat = input.typeResultat,
+                nivaa = input.nivaa,
+            ),
+        )
+    }
+
+    fun deleteSak(sakId: String) {
+        if (!sakRepository.existsById(sakId)) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Sak with id $sakId not found")
+        }
+        sakRepository.deleteById(sakId)
+    }
 }
