@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>klanke-mock</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #121417;
+      --surface: #1c1f24;
+      --surface-raised: #262a31;
+      --border: #3a404a;
+      --text: #e6e8eb;
+      --text-muted: #a3aab5;
+      --accent: #6cb4ff;
+      --row-hover: #232831;
+      --editing: #3a3320;
+      --danger: #ff8a80;
+      --danger-bg: #3d1c1c;
+      --danger-border: #a8433d;
+      --success-bg: #17321f;
+      --success-border: #3f9a5a;
+      --backdrop: rgba(0, 0, 0, 0.65);
+      --warning-bg: #33290f;
+      --warning-border: #9a7a2a;
+      --warning-text: #ffe3a3;
+    }
+    body { font-family: system-ui, sans-serif; margin: 1.5rem; background: var(--bg); color: var(--text); }
+    h1 { font-size: 1.4rem; margin: 0 0 1rem; }
+    h2 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+    button { cursor: pointer; padding: 0.3rem 0.7rem; font: inherit; color: var(--text); background: var(--surface-raised); border: 1px solid var(--border); border-radius: 4px; }
+    button:hover { border-color: var(--accent); }
+    button[type=submit] { background: #1f4a7a; border-color: #2f6db0; }
+    button[type=submit]:hover { background: #255a94; }
+    td.actions button:last-child { color: var(--danger); background: var(--danger-bg); border-color: var(--danger-border); }
+    td.actions button:last-child:hover { background: #522424; border-color: var(--danger); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .message { padding: 0.5rem 0.75rem; margin: 0.5rem 0; border-radius: 4px; white-space: pre-wrap; }
+    .message:empty { display: none; }
+    .message.error { background: var(--danger-bg); border: 1px solid var(--danger-border); color: #ffd6d2; }
+    .message.info { background: var(--success-bg); border: 1px solid var(--success-border); color: #d3f5dc; }
+    .toolbar { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .table-wrapper { overflow-x: auto; }
+    table { border-collapse: collapse; font-size: 0.85rem; background: var(--surface); }
+    th, td { border: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; white-space: nowrap; }
+    th { background: var(--surface-raised); color: var(--text-muted); font-weight: 600; }
+    tbody tr:hover td { background: var(--row-hover); }
+    tr.editing td, tr.editing:hover td { background: var(--editing); }
+    td.actions button { margin-right: 0.25rem; }
+    dialog { padding: 0; width: min(70rem, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.6); }
+    dialog::backdrop { background: var(--backdrop, rgba(0, 0, 0, 0.65)); }
+    /* Padding lives on the inner wrapper so that clicks on the dialog element itself only come from the backdrop. */
+    .dialog-body { padding: 1.25rem; }
+    .dialog-body h2 { margin-top: 0; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 0.6rem 1rem; }
+    label { display: flex; flex-direction: column; font-size: 0.85rem; gap: 0.2rem; color: var(--text-muted); }
+    input, select { padding: 0.3rem; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; }
+    input:focus-visible, select:focus-visible { border-color: var(--accent); outline-offset: 0; }
+    .hint { font-size: 0.75rem; color: var(--text-muted); }
+    .warning { font-size: 0.75rem; padding: 0.3rem 0.5rem; color: var(--warning-text); background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 4px; }
+    .warning[hidden] { display: none; }
+    .form-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>klanke-mock – saker</h1>
+
+  <div class="toolbar">
+    <button id="new-sak" type="button" disabled>Ny sak</button>
+    <button id="refresh" type="button">Oppdater</button>
+  </div>
+
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+
+  <h2>Alle saker</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead><tr id="table-head"></tr></thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <dialog id="sak-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-body">
+      <h2 id="dialog-title">Ny sak</h2>
+      <div id="dialog-message" class="message" role="alert"></div>
+      <form id="sak-form" autocomplete="off">
+        <div id="form-fields" class="form-grid"></div>
+        <div class="form-actions">
+          <button id="submit-button" type="submit">Opprett</button>
+          <button id="cancel-button" type="button">Avbryt</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script>
+    'use strict';
+
+    // Relative, so it also works if the app is served under a path prefix.
+    const API = 'api';
+
+    // Fields of Sak, in display order. Enum fields get their values from GET /api/enums (keyed by field name).
+    // The id is generated by the server and immutable, so it is shown in the table but not in the dialog.
+    const FIELDS = [
+      { name: 'id', inForm: false },
+      { name: 'fagsakId' },
+      { name: 'tema' },
+      { name: 'utfall', enum: true },
+      { name: 'enhetsnummer' },
+      { name: 'vedtaksdatoAsString', date: true, header: 'vedtaksdato (ÅÅÅÅMMDD)' },
+      { name: 'svardatoAsString', date: true, header: 'svardato (ÅÅÅÅMMDD)' },
+      { name: 'fnr' },
+      { name: 'sakstype', enum: true },
+      { name: 'status', enum: true },
+      { name: 'saksbehandlerIdent' },
+      { name: 'typeResultat', enum: true },
+      { name: 'nivaa', enum: true },
+    ];
+    const FORM_FIELDS = FIELDS.filter((field) => field.inForm !== false);
+
+    const DATE_HINT = 'Lagres som ÅÅÅÅMMDD, f.eks. 20240101';
+
+    const dialog = document.getElementById('sak-dialog');
+    const dialogTitle = document.getElementById('dialog-title');
+    const dialogMessageEl = document.getElementById('dialog-message');
+    const form = document.getElementById('sak-form');
+    const formFields = document.getElementById('form-fields');
+    const submitButton = document.getElementById('submit-button');
+    const newSakButton = document.getElementById('new-sak');
+    const tableHead = document.getElementById('table-head');
+    const tableBody = document.getElementById('table-body');
+    const messageEl = document.getElementById('message');
+
+    let enums = {};
+    // Server-side create defaults from /api/defaults, prefilled when the "Ny sak" dialog opens.
+    // Edit mode shows the sak's own values.
+    let defaults = {};
+    let editingId = null;
+    // Raw stored values of date fields that are not valid yyyyMMdd. Kept on save unless a new date is picked.
+    let invalidDates = {};
+
+    function setMessage(el, text, type) {
+      el.textContent = text;
+      el.className = text ? `message ${type}` : 'message';
+    }
+
+    function showMessage(text, type) {
+      setMessage(messageEl, text, type);
+    }
+
+    function displayValue(value) {
+      return value === null || value === undefined ? '' : String(value);
+    }
+
+    // The API stores dates as yyyyMMdd (search sorts on that string); <input type="date"> uses yyyy-MM-dd.
+    function storedToInputDate(stored) {
+      const match = /^(\d{4})(\d{2})(\d{2})$/.exec(stored);
+      if (!match) {
+        return null;
+      }
+      const [, year, month, day] = match.map(Number);
+      const date = new Date(Date.UTC(year, month - 1, day));
+      if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+        return null;
+      }
+      return `${match[1]}-${match[2]}-${match[3]}`;
+    }
+
+    function inputToStoredDate(value) {
+      return value.replaceAll('-', '');
+    }
+
+    async function request(method, path, body) {
+      const options = { method, headers: { Accept: 'application/json' } };
+      if (body !== undefined) {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(body);
+      }
+      const response = await fetch(API + path, options);
+      const text = await response.text().catch(() => '');
+      if (!response.ok) {
+        throw new Error(`${method} /${API}${path} feilet: ${response.status} ${response.statusText}${text ? '\n' + text : ''}`);
+      }
+      return text ? JSON.parse(text) : null;
+    }
+
+    function buildForm() {
+      formFields.replaceChildren();
+      for (const field of FORM_FIELDS) {
+        const label = document.createElement('label');
+        label.append(field.name);
+        let input;
+        if (field.enum) {
+          input = document.createElement('select');
+          const placeholder = document.createElement('option');
+          placeholder.value = '';
+          placeholder.textContent = '– velg –';
+          input.append(placeholder);
+          for (const value of enums[field.name] || []) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            input.append(option);
+          }
+        } else {
+          input = document.createElement('input');
+          input.type = field.date ? 'date' : 'text';
+        }
+        input.name = field.name;
+        input.required = Boolean(field.enum);
+        label.append(input);
+        if (field.date) {
+          const hint = document.createElement('span');
+          hint.className = 'hint';
+          hint.id = `${field.name}-hint`;
+          hint.textContent = DATE_HINT;
+          const warning = document.createElement('span');
+          warning.className = 'warning';
+          warning.id = `${field.name}-warning`;
+          warning.setAttribute('role', 'alert');
+          warning.hidden = true;
+          input.setAttribute('aria-describedby', `${hint.id} ${warning.id}`);
+          label.append(hint, warning);
+        }
+        formFields.append(label);
+      }
+      resetForm();
+      newSakButton.disabled = false;
+    }
+
+    function resetForm() {
+      editingId = null;
+      invalidDates = {};
+      form.reset();
+      for (const field of FORM_FIELDS.filter((f) => f.date)) {
+        const warning = document.getElementById(`${field.name}-warning`);
+        warning.textContent = '';
+        warning.hidden = true;
+      }
+      submitButton.disabled = false;
+      setMessage(dialogMessageEl, '', '');
+      highlightEditingRow();
+    }
+
+    function openDialog() {
+      dialog.showModal();
+      form.querySelector('input, select').focus();
+    }
+
+    function openCreateDialog() {
+      resetForm();
+      for (const field of FORM_FIELDS) {
+        if (!(field.name in defaults)) {
+          continue;
+        }
+        const value = displayValue(defaults[field.name]);
+        if (field.date) {
+          setDateField(field.name, value);
+        } else {
+          form.elements[field.name].value = value;
+        }
+      }
+      dialogTitle.textContent = 'Ny sak';
+      submitButton.textContent = 'Opprett';
+      openDialog();
+    }
+
+    function openEditDialog(sak) {
+      resetForm();
+      editingId = sak.id;
+      for (const field of FORM_FIELDS) {
+        const value = displayValue(sak[field.name]);
+        if (field.date) {
+          setDateField(field.name, value);
+        } else {
+          form.elements[field.name].value = value;
+        }
+      }
+      dialogTitle.textContent = `Endre sak ${sak.id}`;
+      submitButton.textContent = 'Lagre';
+      highlightEditingRow();
+      openDialog();
+    }
+
+    function setDateField(name, stored) {
+      const inputValue = storedToInputDate(stored);
+      form.elements[name].value = inputValue || '';
+      if (stored !== '' && inputValue === null) {
+        invalidDates[name] = stored;
+        const warning = document.getElementById(`${name}-warning`);
+        warning.textContent = `Lagret verdi «${stored}» er ikke en gyldig ÅÅÅÅMMDD-dato. Den beholdes ved lagring med mindre du velger en ny dato.`;
+        warning.hidden = false;
+      }
+    }
+
+    function highlightEditingRow() {
+      for (const row of tableBody.rows) {
+        row.classList.toggle('editing', editingId !== null && row.dataset.id === editingId);
+      }
+    }
+
+    function readForm() {
+      const sak = {};
+      for (const field of FORM_FIELDS) {
+        const value = form.elements[field.name].value;
+        if (field.date) {
+          sak[field.name] = value === '' && field.name in invalidDates ? invalidDates[field.name] : inputToStoredDate(value);
+        } else {
+          sak[field.name] = value;
+        }
+      }
+      return sak;
+    }
+
+    function renderTable(saker) {
+      const headCells = FIELDS.map((field) => {
+        const th = document.createElement('th');
+        th.textContent = field.header || field.name;
+        return th;
+      });
+      const actionsTh = document.createElement('th');
+      actionsTh.textContent = 'Handlinger';
+      tableHead.replaceChildren(...headCells, actionsTh);
+
+      tableBody.replaceChildren();
+      if (saker.length === 0) {
+        const cell = tableBody.insertRow().insertCell();
+        cell.colSpan = FIELDS.length + 1;
+        cell.textContent = 'Ingen saker';
+        return;
+      }
+      for (const sak of saker) {
+        const row = tableBody.insertRow();
+        row.dataset.id = sak.id;
+        for (const field of FIELDS) {
+          row.insertCell().textContent = displayValue(sak[field.name]);
+        }
+        const actionsCell = row.insertCell();
+        actionsCell.className = 'actions';
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.textContent = 'Endre';
+        editButton.addEventListener('click', () => openEditDialog(sak));
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.textContent = 'Slett';
+        deleteButton.addEventListener('click', () => deleteSak(sak.id));
+        actionsCell.append(editButton, deleteButton);
+      }
+      highlightEditingRow();
+    }
+
+    async function loadSaker() {
+      renderTable((await request('GET', '/saker')) || []);
+    }
+
+    async function deleteSak(id) {
+      if (!confirm(`Slette sak ${id}?`)) {
+        return;
+      }
+      try {
+        await request('DELETE', `/saker/${encodeURIComponent(id)}`);
+        if (editingId === id) {
+          resetForm();
+        }
+        showMessage(`Sak ${id} slettet.`, 'info');
+        await loadSaker();
+      } catch (e) {
+        showMessage(e.message, 'error');
+      }
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      // The body never contains the id; on edit it is only in the PUT path.
+      const sak = readForm();
+      const sakId = editingId;
+      const isCreate = sakId === null;
+      submitButton.disabled = true;
+      setMessage(dialogMessageEl, '', '');
+      let saved;
+      try {
+        if (isCreate) {
+          saved = await request('POST', '/saker', sak);
+        } else {
+          saved = await request('PUT', `/saker/${encodeURIComponent(sakId)}`, sak);
+        }
+      } catch (e) {
+        setMessage(dialogMessageEl, e.message, 'error');
+        submitButton.disabled = false;
+        return;
+      }
+      const id = saved?.id ?? sakId;
+      dialog.close();
+      showMessage(isCreate ? `Sak ${id} opprettet.` : `Sak ${id} lagret.`, 'info');
+      try {
+        await loadSaker();
+      } catch (e) {
+        showMessage(e.message, 'error');
+      }
+    });
+
+    // Fires for Avbryt, Escape (native cancel), backdrop click and after a successful save.
+    dialog.addEventListener('close', () => resetForm());
+
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
+
+    document.getElementById('cancel-button').addEventListener('click', () => dialog.close());
+
+    newSakButton.addEventListener('click', () => openCreateDialog());
+
+    document.getElementById('refresh').addEventListener('click', async () => {
+      showMessage('', '');
+      try {
+        await loadSaker();
+      } catch (e) {
+        showMessage(e.message, 'error');
+      }
+    });
+
+    (async () => {
+      const [enumsResult, defaultsResult] = await Promise.allSettled([
+        request('GET', '/enums'),
+        request('GET', '/defaults'),
+      ]);
+      enums = (enumsResult.status === 'fulfilled' && enumsResult.value) || {};
+      defaults = (defaultsResult.status === 'fulfilled' && defaultsResult.value) || {};
+      const startupErrors = [enumsResult, defaultsResult]
+        .filter((result) => result.status === 'rejected')
+        .map((result) => result.reason.message);
+      if (startupErrors.length > 0) {
+        showMessage(startupErrors.join('\n'), 'error');
+      }
+      buildForm();
+      try {
+        await loadSaker();
+      } catch (e) {
+        showMessage(e.message, 'error');
+      }
+    })();
+  </script>
+</body>
+</html>

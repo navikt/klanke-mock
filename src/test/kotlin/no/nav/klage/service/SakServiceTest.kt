@@ -46,6 +46,18 @@ class SakServiceTest {
     }
 
     @Test
+    fun `getEnums returns all enum values keyed by Sak field name`() {
+        val result = sakService.getEnums()
+
+        assertThat(result).containsOnlyKeys("utfall", "sakstype", "status", "typeResultat", "nivaa")
+        assertThat(result["utfall"]).isEqualTo(Utfall.entries.map { it.name })
+        assertThat(result["sakstype"]).isEqualTo(Sakstype.entries.map { it.name })
+        assertThat(result["status"]).isEqualTo(SakStatus.entries.map { it.name })
+        assertThat(result["typeResultat"]).isEqualTo(TypeResultat.entries.map { it.name })
+        assertThat(result["nivaa"]).isEqualTo(Nivaa.entries.map { it.name })
+    }
+
+    @Test
     fun `createSak saves sak with generated id and fields from input`() {
         val saved = slot<Sak>()
         every { sakRepository.existsById(any()) } returns false

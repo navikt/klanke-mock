@@ -56,6 +56,14 @@ class SakController(
     }
 
     // Utility. Not in the original api we are mocking. Could be useful in tests.
+    @GetMapping("/enums")
+    fun getEnums(): Map<String, List<String>> {
+        logger.debug("getEnums")
+
+        return sakService.getEnums()
+    }
+
+    // Utility. Not in the original api we are mocking. Could be useful in tests.
     @GetMapping("/defaults")
     fun getDefaults(): Map<String, String> {
         logger.debug("getDefaults")

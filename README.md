@@ -1,9 +1,14 @@
 # klanke-mock
 A mock server for testing purposes. A stateful mock server that can be used to simulate the real Klanke-app.
 
-# Utility endpoints
+# UI for managing mock data
 
-These endpoints are not part of the original API being mocked, but can be used directly in tests:
+A simple UI for listing, creating, editing and deleting saker is served at `/`:
+
+- Locally: http://localhost:7070/
+- Dev: https://klanke-mock.intern.dev.nav.no/
+
+The UI uses these utility endpoints, which are not part of the original API being mocked, but can also be used directly in tests:
 
 | Method   | Path                   | Description                                                      |
 |----------|------------------------|------------------------------------------------------------------|
@@ -11,6 +16,7 @@ These endpoints are not part of the original API being mocked, but can be used d
 | `POST`   | `/api/saker`           | Create a sak (see below), returns the new `Sak`                  |
 | `PUT`    | `/api/saker/{sakId}`   | Replace a sak (see below), returns the updated `Sak`             |
 | `DELETE` | `/api/saker/{sakId}`   | Delete a sak (204 No Content, 404 if it does not exist)          |
+| `GET`    | `/api/enums`           | Allowed values for the enum fields of `Sak`, keyed by field name |
 | `GET`    | `/api/defaults`        | Default values used on create, keyed by field name               |
 
 ## Creating a sak

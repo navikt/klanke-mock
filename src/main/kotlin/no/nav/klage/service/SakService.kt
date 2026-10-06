@@ -136,6 +136,15 @@ class SakService(
 
     fun getAllSaker(): List<Sak> = sakRepository.findAll().sortedBy { it.id }
 
+    fun getEnums(): Map<String, List<String>> =
+        mapOf(
+            "utfall" to Utfall.entries.map { it.name },
+            "sakstype" to Sakstype.entries.map { it.name },
+            "status" to SakStatus.entries.map { it.name },
+            "typeResultat" to TypeResultat.entries.map { it.name },
+            "nivaa" to Nivaa.entries.map { it.name },
+        )
+
     fun createSak(input: CreateSakInput): Sak =
         sakRepository.save(
             Sak(
