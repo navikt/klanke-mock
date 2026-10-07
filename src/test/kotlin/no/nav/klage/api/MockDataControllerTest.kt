@@ -19,6 +19,7 @@ import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -168,6 +169,15 @@ class MockDataControllerTest {
             .andExpect(jsonPath("$.detail").value(containsString("Missing required creator property")))
 
         verify(exactly = 0) { sakRepository.save(any()) }
+    }
+
+    @Test
+    fun `unsupported method returns 405 as problem detail`() {
+        mockMvc
+            .perform(patch("/mock-data/saker/sak1"))
+            .andExpect(status().isMethodNotAllowed)
+            .andExpect(jsonPath("$.status").value(405))
+            .andExpect(jsonPath("$.detail").value(containsString("PATCH")))
     }
 
     @Test
