@@ -1,6 +1,7 @@
 package no.nav.klage.api
 
 import io.mockk.mockk
+import no.nav.klage.config.OpenApiConfig
 import no.nav.klage.repository.SakRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import tools.jackson.databind.json.JsonMapper
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -51,6 +53,47 @@ class OpenApiDocsTest(
         }
         assertThat(response.body()).contains("\"/api/saker\"", "\"/api/saker/{sakId}\"", "\"title\":\"klanke-mock\"")
         assertThat(response.body()).doesNotContain("\"/\":")
+    }
+
+    @Test
+    fun `api docs group endpoints by controller tag`() {
+        val docs = JsonMapper.builder().build().readTree(get("/v3/api-docs").body())
+
+        val tagNames: List<String> = docs.path("tags").values().map { it.path("name").asString() }
+        assertThat(tagNames).containsExactly(OpenApiConfig.KLANKE_API_TAG, OpenApiConfig.MOCK_DATA_TAG)
+
+        val operationsByTag =
+            docs
+                .path("paths")
+                .properties()
+                .flatMap { (path, operations) ->
+                    operations.properties().map { (method, operation) ->
+                        operation
+                            .path("tags")
+                            .values()
+                            .single()
+                            .asString() to "${method.uppercase()} $path"
+                    }
+                }.groupBy(keySelector = { it.first }, valueTransform = { it.second })
+
+        assertThat(operationsByTag.keys).containsExactlyInAnyOrder(OpenApiConfig.KLANKE_API_TAG, OpenApiConfig.MOCK_DATA_TAG)
+        assertThat(operationsByTag[OpenApiConfig.KLANKE_API_TAG]).containsExactlyInAnyOrder(
+            "POST /api/saker.rest",
+            "POST /api/saker/{sakId}/handledinkabal.rest",
+            "POST /api/saker/{sakId}/assignedinkabal.rest",
+            "POST /api/saker/{sakId}/finished.rest",
+            "POST /api/saker/{sakId}/feilregistrert.rest",
+            "POST /api/saker/{sakId}/detailsappaccess.rest",
+            "GET /api/access.rest",
+        )
+        assertThat(operationsByTag[OpenApiConfig.MOCK_DATA_TAG]).containsExactlyInAnyOrder(
+            "GET /api/saker",
+            "POST /api/saker",
+            "PUT /api/saker/{sakId}",
+            "DELETE /api/saker/{sakId}",
+            "GET /api/enums",
+            "GET /api/defaults",
+        )
     }
 
     @Test

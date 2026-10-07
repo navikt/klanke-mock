@@ -27,14 +27,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.json.JsonMapper
 
-class SakControllerTest {
+class MockDataControllerTest {
     private val sakRepository: SakRepository = mockk()
 
     // Standalone MockMvc with the real SakService and a mocked repository (no DB needed), using the
     // JsonMapper Spring Boot configures for the app.
     private val mockMvc: MockMvc =
         MockMvcBuilders
-            .standaloneSetup(SakController(sakService = SakService(sakRepository = sakRepository)))
+            .standaloneSetup(MockDataController(sakService = SakService(sakRepository = sakRepository)))
+            .setControllerAdvice(ApiExceptionHandler())
             .setMessageConverters(JacksonJsonHttpMessageConverter(bootJsonMapper()))
             .build()
 
