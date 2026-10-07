@@ -8,6 +8,7 @@ val mockkVersion = "1.14.11"
 val testContainersVersion = "2.0.5"
 val logstashVersion = "9.0"
 val logbackSyslog4jVersion = "1.0.0"
+val springDocVersion = "3.1.1"
 
 plugins {
     val kotlinVersion = "2.4.10"
@@ -56,6 +57,7 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
     implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage")

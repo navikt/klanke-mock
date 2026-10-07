@@ -19,6 +19,7 @@ import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -27,14 +28,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.json.JsonMapper
 
-class SakControllerTest {
+class MockDataControllerTest {
     private val sakRepository: SakRepository = mockk()
 
     // Standalone MockMvc with the real SakService and a mocked repository (no DB needed), using the
     // JsonMapper Spring Boot configures for the app.
     private val mockMvc: MockMvc =
         MockMvcBuilders
-            .standaloneSetup(SakController(sakService = SakService(sakRepository = sakRepository)))
+            .standaloneSetup(MockDataController(sakService = SakService(sakRepository = sakRepository)))
+            .setControllerAdvice(ApiExceptionHandler())
             .setMessageConverters(JacksonJsonHttpMessageConverter(bootJsonMapper()))
             .build()
 
@@ -170,9 +172,18 @@ class SakControllerTest {
     }
 
     @Test
+    fun `unsupported method returns 405 as problem detail`() {
+        mockMvc
+            .perform(patch("/mock-data/saker/sak1"))
+            .andExpect(status().isMethodNotAllowed)
+            .andExpect(jsonPath("$.status").value(405))
+            .andExpect(jsonPath("$.detail").value(containsString("PATCH")))
+    }
+
+    @Test
     fun `GET defaults returns defaults keyed by field name`() {
         mockMvc
-            .perform(get("/api/defaults"))
+            .perform(get("/mock-data/defaults"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(SakDefaults.asMap().size))
             .andExpectDefaults(
@@ -199,12 +210,12 @@ class SakControllerTest {
     }
 
     private fun postSak(body: String): ResultActions =
-        mockMvc.perform(post("/api/saker").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/mock-data/saker").contentType(MediaType.APPLICATION_JSON).content(body))
 
     private fun putSak(
         sakId: String,
         body: String,
-    ): ResultActions = mockMvc.perform(put("/api/saker/$sakId").contentType(MediaType.APPLICATION_JSON).content(body))
+    ): ResultActions = mockMvc.perform(put("/mock-data/saker/$sakId").contentType(MediaType.APPLICATION_JSON).content(body))
 
     private fun String.withId(id: String): String = replaceFirst(oldValue = "{", newValue = """{"id": "$id",""")
 

@@ -1,5 +1,6 @@
 package no.nav.klage.api
 
+import io.swagger.v3.oas.annotations.Hidden
 import no.nav.klage.getLogger
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
@@ -7,6 +8,8 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
+// The HTML UI, not an API endpoint, so it is left out of the OpenAPI docs.
+@Hidden
 @RestController
 class UiController {
     companion object {

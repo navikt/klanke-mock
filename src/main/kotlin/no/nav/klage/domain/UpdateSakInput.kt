@@ -3,7 +3,7 @@ package no.nav.klage.domain
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
- * Body for replacing a sak with `PUT /api/saker/{sakId}`. The id is immutable and always taken from the path.
+ * Body for replacing a sak with `PUT /mock-data/saker/{sakId}`. The id is immutable and always taken from the path.
  *
  * Every other field is required; no create defaults are applied, since a full replace that silently reset
  * missing fields to defaults would be surprising. [id] may be left out. If it is sent, it must match the
