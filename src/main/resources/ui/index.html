@@ -27,7 +27,9 @@
       --warning-text: #ffe3a3;
     }
     body { font-family: system-ui, sans-serif; margin: 1.5rem; background: var(--bg); color: var(--text); }
-    h1 { font-size: 1.4rem; margin: 0 0 1rem; }
+    h1 { font-size: 1.4rem; margin: 0; }
+    header { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    header a { font-size: 0.85rem; color: var(--accent); }
     h2 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
     button { cursor: pointer; padding: 0.3rem 0.7rem; font: inherit; color: var(--text); background: var(--surface-raised); border: 1px solid var(--border); border-radius: 4px; }
     button:hover { border-color: var(--accent); }
@@ -64,7 +66,10 @@
   </style>
 </head>
 <body>
-  <h1>klanke-mock – saker</h1>
+  <header>
+    <h1>klanke-mock – saker</h1>
+    <a href="swagger-ui.html">API-dokumentasjon (Swagger)</a>
+  </header>
 
   <div class="toolbar">
     <button id="new-sak" type="button" disabled>Ny sak</button>
