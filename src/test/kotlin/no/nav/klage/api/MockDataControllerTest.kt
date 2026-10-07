@@ -173,7 +173,7 @@ class MockDataControllerTest {
     @Test
     fun `GET defaults returns defaults keyed by field name`() {
         mockMvc
-            .perform(get("/api/defaults"))
+            .perform(get("/mock-data/defaults"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(SakDefaults.asMap().size))
             .andExpectDefaults(
@@ -200,12 +200,12 @@ class MockDataControllerTest {
     }
 
     private fun postSak(body: String): ResultActions =
-        mockMvc.perform(post("/api/saker").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/mock-data/saker").contentType(MediaType.APPLICATION_JSON).content(body))
 
     private fun putSak(
         sakId: String,
         body: String,
-    ): ResultActions = mockMvc.perform(put("/api/saker/$sakId").contentType(MediaType.APPLICATION_JSON).content(body))
+    ): ResultActions = mockMvc.perform(put("/mock-data/saker/$sakId").contentType(MediaType.APPLICATION_JSON).content(body))
 
     private fun String.withId(id: String): String = replaceFirst(oldValue = "{", newValue = """{"id": "$id",""")
 

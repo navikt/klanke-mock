@@ -51,7 +51,7 @@ class OpenApiDocsTest(
         assertThat(response.headers().firstValue("Content-Type")).hasValueSatisfying {
             assertThat(it).startsWith("application/json")
         }
-        assertThat(response.body()).contains("\"/api/saker\"", "\"/api/saker/{sakId}\"", "\"title\":\"klanke-mock\"")
+        assertThat(response.body()).contains("\"/mock-data/saker\"", "\"/mock-data/saker/{sakId}\"", "\"title\":\"klanke-mock\"")
         assertThat(response.body()).doesNotContain("\"/\":")
     }
 
@@ -87,12 +87,12 @@ class OpenApiDocsTest(
             "GET /api/access.rest",
         )
         assertThat(operationsByTag[OpenApiConfig.MOCK_DATA_TAG]).containsExactlyInAnyOrder(
-            "GET /api/saker",
-            "POST /api/saker",
-            "PUT /api/saker/{sakId}",
-            "DELETE /api/saker/{sakId}",
-            "GET /api/enums",
-            "GET /api/defaults",
+            "GET /mock-data/saker",
+            "POST /mock-data/saker",
+            "PUT /mock-data/saker/{sakId}",
+            "DELETE /mock-data/saker/{sakId}",
+            "GET /mock-data/enums",
+            "GET /mock-data/defaults",
         )
     }
 

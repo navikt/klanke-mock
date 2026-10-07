@@ -1,6 +1,6 @@
 package no.nav.klage.domain
 
-// Values used for fields left out (or sent as null) when creating a sak. Also served by GET /api/defaults.
+// Values used for fields left out (or sent as null) when creating a sak. Also served by GET /mock-data/defaults.
 object SakDefaults {
     const val TEMA = "SYK"
     val UTFALL = Utfall.AVSLAG

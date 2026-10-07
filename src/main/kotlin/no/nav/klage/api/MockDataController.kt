@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 // Could be useful in tests.
 @Tag(name = OpenApiConfig.MOCK_DATA_TAG)
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/mock-data")
 class MockDataController(
     private val sakService: SakService,
 ) {
